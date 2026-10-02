@@ -1031,6 +1031,7 @@
       const encodedApp = document.getElementById('offline-app-payload').textContent.trim();
       const appBytes = Uint8Array.from(atob(encodedApp), character => character.charCodeAt(0));
       const appHtml = new TextDecoder().decode(appBytes);
+      const homeUrl = window.location.href;
       const appWindow = window.open('', '_blank');
 
       if (!appWindow) {
@@ -1041,6 +1042,16 @@
       appWindow.document.open();
       appWindow.document.write(appHtml);
       appWindow.document.close();
+
+      const homeButton = appWindow.document.createElement('button');
+      homeButton.type = 'button';
+      homeButton.textContent = '\u2190 Home';
+      homeButton.setAttribute('aria-label', 'Return to VixorAI home');
+      homeButton.style.cssText = 'position:fixed;top:calc(12px + env(safe-area-inset-top, 0px));right:12px;z-index:9999;min-height:42px;padding:9px 14px;border:1px solid var(--line, #242a44);border-radius:10px;background:var(--cardh, #161b2e);color:var(--ink, #f2f4fb);font:600 14px Inter, sans-serif;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.22)';
+      homeButton.addEventListener('click', () => {
+        appWindow.location.href = homeUrl;
+      });
+      appWindow.document.body.appendChild(homeButton);
     }
 
     const tabButtons = document.querySelectorAll('.tab-btn');
