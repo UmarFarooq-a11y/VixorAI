@@ -1,0 +1,1196 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VixorAI — Smart School & Medical Intelligence</title>
+  <meta name="description" content="VixorAI is a browser-based offline intelligence suite for schools and healthcare tools such as report cards, ID cards, certificates, and CBC analysis." />
+  <link rel="icon" type="image/png" href="./vixorai-logo.png" />
+  <link rel="apple-touch-icon" href="./vixorai-logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #07111f;
+      --bg-soft: #0d1b2a;
+      --panel: rgba(16, 24, 39, 0.8);
+      --panel-strong: #131d2d;
+      --line: rgba(255,255,255,0.08);
+      --card: rgba(17, 25, 38, 0.9);
+      --ink: #edf3ff;
+      --muted: #9aaac4;
+      --primary: #7c5cff;
+      --primary-2: #29d0b1;
+      --accent: #ffb950;
+      --danger: #ff6b7a;
+      --success: #5fe3a1;
+      --shadow: 0 18px 45px rgba(8, 12, 22, 0.45);
+      --radius: 24px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, sans-serif;
+      background:
+        radial-gradient(circle at 0% 0%, rgba(124, 92, 255, 0.22), transparent 24%),
+        radial-gradient(circle at 100% 0%, rgba(41, 208, 177, 0.18), transparent 26%),
+        var(--bg);
+      color: var(--ink);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; display: block; }
+    button, input { font: inherit; }
+
+    .container {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(18px);
+      background: rgba(7, 17, 31, 0.5);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 76px;
+      gap: 20px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: "Space Grotesk", sans-serif;
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      font-size: 1.35rem;
+    }
+
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      object-fit: cover;
+      box-shadow: 0 12px 28px rgba(41, 208, 177, 0.2);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+    .nav-links a:hover { color: var(--ink); }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .pill {
+      border: 1px solid rgba(124, 92, 255, 0.35);
+      background: rgba(124, 92, 255, 0.08);
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 14px;
+      border: 1px solid transparent;
+      padding: 14px 22px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    }
+    .button:hover { transform: translateY(-2px); }
+
+    .button.primary {
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      color: #051521;
+      box-shadow: 0 18px 30px rgba(124, 92, 255, 0.4);
+    }
+
+    .button.secondary {
+      background: rgba(255,255,255,0.02);
+      color: var(--ink);
+      border-color: var(--line);
+    }
+
+    .hero { padding-top: 90px; padding-bottom: 40px; }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 32px;
+      align-items: center;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid rgba(41, 208, 177, 0.35);
+      background: rgba(41, 208, 177, 0.08);
+      color: var(--primary-2);
+      border-radius: 999px;
+      padding: 7px 14px;
+      font-size: 0.75rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    h1 {
+      margin: 24px 0 18px;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: clamp(2.8rem, 5vw, 5rem);
+      line-height: 0.94;
+      letter-spacing: -0.06em;
+    }
+    h1 .gradient {
+      background: linear-gradient(90deg, var(--primary), var(--primary-2), #8de8ff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .lead {
+      font-size: 1.1rem;
+      color: var(--muted);
+      max-width: 70ch;
+      margin: 0 0 26px;
+    }
+
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .mini-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    .mini-meta span {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 18px rgba(95, 227, 161, 0.9);
+    }
+
+    .hero-card {
+      background: linear-gradient(180deg, rgba(19, 29, 45, 0.96), rgba(13, 27, 42, 0.9));
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+
+    .dashboard {
+      background: rgba(8, 14, 22, 0.8);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 20px;
+      padding: 18px;
+      margin-top: 18px;
+    }
+
+    .dash-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      color: var(--muted);
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .bars {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      align-items: end;
+      gap: 12px;
+      min-height: 170px;
+      padding-top: 8px;
+    }
+    .bar {
+      position: relative;
+      border-radius: 14px 14px 10px 10px;
+      background: linear-gradient(180deg, rgba(124, 92, 255, 0.7), rgba(41, 208, 177, 0.8));
+      min-height: 34px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.15);
+    }
+    .bar::before {
+      content: attr(data-value);
+      position: absolute;
+      top: -26px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+
+    .keypoints {
+      padding: 18px 0 0;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .keypoints > div {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 12px 10px;
+      background: rgba(255,255,255,0.02);
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    .keypoints b {
+      display: block;
+      color: var(--ink);
+      font-size: 1rem;
+      margin-top: 4px;
+    }
+
+    .section { padding: 54px 0; }
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+    .section-header h2 {
+      margin: 0;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: clamp(2rem, 3vw, 3rem);
+      letter-spacing: -0.06em;
+    }
+    .section-header p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 60ch;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 20px;
+    }
+    .feature-card {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 24px;
+      min-height: 260px;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .feature-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(124, 92, 255, 0.4);
+    }
+    .iconbox {
+      width: 58px;
+      height: 58px;
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, rgba(124, 92, 255, 0.18), rgba(41, 208, 177, 0.16));
+      border: 1px solid rgba(124, 92, 255, 0.22);
+      margin-bottom: 18px;
+      font-size: 1.7rem;
+    }
+    .feature-card h3 {
+      margin: 0 0 10px;
+      font-size: 1.3rem;
+      letter-spacing: -0.04em;
+    }
+    .feature-card p { margin: 0; color: var(--muted); }
+    .feature-card ul {
+      padding-left: 18px;
+      color: var(--muted);
+      margin: 16px 0 0;
+    }
+    .feature-card li + li { margin-top: 8px; }
+
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 18px;
+    }
+    .tool-card {
+      position: relative;
+      background: linear-gradient(180deg, rgba(20, 30, 46, 0.7), rgba(10, 17, 27, 0.9));
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 22px;
+      overflow: hidden;
+    }
+    .tool-card::after {
+      content: "";
+      position: absolute;
+      inset: auto -12% -35% auto;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(124, 92, 255, 0.32), transparent 60%);
+    }
+    .tool-card h4 {
+      margin: 14px 0 8px;
+      font-size: 1.15rem;
+      letter-spacing: -0.04em;
+    }
+    .tool-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.93rem;
+    }
+    .tool-badge {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(124, 92, 255, 0.2);
+      background: rgba(124, 92, 255, 0.08);
+      color: #d7d0ff;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 20px;
+    }
+    .step {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 24px;
+    }
+    .step-number {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      color: #06121d;
+      margin-bottom: 14px;
+    }
+    .step h3 {
+      margin: 0 0 8px;
+      font-size: 1.15rem;
+      letter-spacing: -0.04em;
+    }
+    .step p { margin: 0; color: var(--muted); }
+
+    .showcase { padding: 34px 0 10px; }
+    .showcase-wrap {
+      display: grid;
+      grid-template-columns: 1fr 1.1fr;
+      gap: 24px;
+      align-items: start;
+    }
+    .panel {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 20px;
+    }
+    .tab-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .tab-btn {
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.015);
+      color: var(--muted);
+      cursor: pointer;
+      font-weight: 700;
+    }
+    .tab-btn.active {
+      background: rgba(124, 92, 255, 0.12);
+      border-color: rgba(124, 92, 255, 0.38);
+      color: var(--ink);
+    }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .form-grid { display: grid; gap: 14px; }
+    .two-col {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .field { display: grid; gap: 8px; }
+    .field label {
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .field input, .field select {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: rgba(8, 14, 22, 0.9);
+      color: var(--ink);
+      font: inherit;
+      padding: 12px 14px;
+    }
+
+    .preview {
+      min-height: 350px;
+      background: linear-gradient(180deg, rgba(7,17,31,0.96), rgba(14,22,34,0.96));
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 18px;
+    }
+
+    .report-preview {
+      background: linear-gradient(180deg, rgba(14, 23, 35, 0.8), rgba(11, 18, 26, 0.9));
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.08);
+      padding: 18px;
+    }
+    .report-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      margin-bottom: 14px;
+    }
+    .report-badge {
+      display: inline-block;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(95, 227, 161, 0.12);
+      color: var(--success);
+      border: 1px solid rgba(95, 227, 161, 0.25);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin: 12px 0 16px;
+    }
+    .summary-box {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+    }
+    .summary-box span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .summary-box b { font-size: 1.3rem; letter-spacing: -0.04em; }
+
+    .subject-list { display: grid; gap: 10px; }
+    .subject-row {
+      display: grid;
+      grid-template-columns: 1.3fr 0.7fr 0.8fr;
+      gap: 8px;
+      align-items: center;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.06);
+      color: var(--muted);
+    }
+    .subject-row strong { color: var(--ink); }
+
+    .cbc-card {
+      background: rgba(12, 18, 28, 0.95);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 18px;
+      padding: 18px;
+    }
+    .cbc-metric {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin: 10px 0;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    .cbc-metric small {
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 0.72rem;
+    }
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .status.good { background: rgba(95,227,161,0.12); color: var(--success); border: 1px solid rgba(95,227,161,0.2); }
+    .status.warn { background: rgba(255,185,80,0.12); color: var(--accent); border: 1px solid rgba(255,185,80,0.2); }
+    .status.alert { background: rgba(255,107,122,0.12); color: var(--danger); border: 1px solid rgba(255,107,122,0.2); }
+
+    .story {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 22px;
+      align-items: center;
+      padding-top: 20px;
+    }
+    .story-card {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 28px;
+    }
+    .story-card h3 {
+      margin: 0 0 14px;
+      letter-spacing: -0.05em;
+      font-size: clamp(1.7rem, 3vw, 2.8rem);
+      font-family: "Space Grotesk", sans-serif;
+    }
+    .story-card p { margin: 0 0 18px; color: var(--muted); }
+
+    .name-box {
+      background: linear-gradient(135deg, rgba(124,92,255,0.18), rgba(41,208,177,0.12));
+      border: 1px solid rgba(124, 92, 255, 0.22);
+      border-radius: 22px;
+      padding: 28px;
+      min-height: 260px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .name-box .small {
+      display: inline-block;
+      color: #d9d4ff;
+      letter-spacing: 0.14em;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .name-box h4 {
+      font-size: clamp(2.3rem, 4vw, 4rem);
+      line-height: 0.9;
+      margin: 0 0 10px;
+      letter-spacing: -0.06em;
+      font-family: "Space Grotesk", sans-serif;
+    }
+    .name-box p {
+      margin: 0;
+      color: rgba(237,243,255,0.8);
+      font-size: 1.05rem;
+    }
+
+    .cta {
+      padding: 70px 0 100px;
+    }
+    .cta-box {
+      background: linear-gradient(135deg, rgba(124, 92, 255, 0.1), rgba(41, 208, 177, 0.1));
+      border: 1px solid rgba(124, 92, 255, 0.25);
+      border-radius: 28px;
+      padding: clamp(26px, 4vw, 42px);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+    .cta h3 {
+      margin: 0 0 8px;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: clamp(2rem, 3vw, 3rem);
+      letter-spacing: -0.06em;
+    }
+    .cta p { margin: 0; color: var(--muted); font-size: 1rem; }
+
+    footer {
+      border-top: 1px solid var(--line);
+      padding: 22px 0 40px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    .foot {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 980px) {
+      .hero-grid, .showcase-wrap, .story { display: grid; grid-template-columns: 1fr; }
+      .feature-grid, .tools-grid, .steps { grid-template-columns: repeat(2, minmax(0, 1fr)); display: grid; }
+      .nav-links { display: none; }
+      .section-header { display: grid; align-items: start; }
+    }
+
+    @media (max-width: 620px) {
+      .feature-grid, .tools-grid, .steps, .two-col, .summary-grid, .keypoints { grid-template-columns: 1fr; }
+      .nav { min-height: 64px; gap: 10px; }
+      .brand { gap: 8px; font-size: 1.1rem; }
+      .brand-mark { width: 36px; height: 36px; }
+      .nav-actions { width: auto; flex: 0 0 auto; gap: 0; }
+      .nav-actions .button { width: auto; min-height: 42px; padding: 10px 12px; font-size: 0.82rem; }
+      .button { width: auto; min-height: 44px; }
+      .hero-actions { display: grid; grid-template-columns: minmax(0, 1fr); }
+      .hero-actions .button, .form-grid > .button, .cta-box > .button { width: 100%; }
+      .pill { display: none; }
+      .hero { padding-top: 48px; }
+      .section { padding: 42px 0; }
+      h1 { font-size: 2.5rem; line-height: 1; }
+      .section-header h2 { font-size: 1.85rem; }
+      .panel { padding: 14px; }
+      .preview, .report-preview { padding: 12px; }
+      .subject-row { grid-template-columns: minmax(0, 1.2fr) minmax(42px, 0.5fr) minmax(42px, 0.5fr); font-size: 0.9rem; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container nav">
+      <div class="brand">
+        <img class="brand-mark" src="./vixorai-logo.png" alt="VixorAI logo" />
+        <span>VixorAI</span>
+      </div>
+
+      <nav class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#tools">Tools</a>
+        <a href="#why">Why VixorAI</a>
+        <a href="#demo">Live Demo</a>
+      </nav>
+
+      <div class="nav-actions">
+        <span class="pill">Offline-first</span>
+        <a class="button primary" href="./ViXorAI%20(1).html">Launch App</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container hero-grid">
+        <div>
+          <span class="eyebrow">Smart tools for schools & healthcare</span>
+          <h1>Turn scattered data into <span class="gradient">clear decisions</span>.</h1>
+          <p class="lead">
+            VixorAI is a browser-based intelligence platform built for schools, institutions, and medical reporting. It helps you generate cards, summaries, reports, and clinical insights without a backend, without installation, and without dependency on internet access.
+          </p>
+
+          <div class="hero-actions">
+            <a class="button primary" href="./ViXorAI%20(1).html">Open working app</a>
+            <button class="button secondary" onclick="document.getElementById('features').scrollIntoView({behavior:'smooth'})">Explore features</button>
+          </div>
+
+          <div class="mini-meta">
+            <span><i class="dot"></i> Works fully offline</span>
+            <span><i class="dot"></i> Built for real users</span>
+            <span><i class="dot"></i> No server required</span>
+          </div>
+        </div>
+
+        <div class="hero-card">
+          <div class="dash-top">
+            <span>Performance snapshot</span>
+            <span>Live analytics</span>
+          </div>
+
+          <div class="dashboard">
+            <div class="bars">
+              <div class="bar" data-value="82" style="height:82%"></div>
+              <div class="bar" data-value="68" style="height:68%"></div>
+              <div class="bar" data-value="94" style="height:94%"></div>
+              <div class="bar" data-value="76" style="height:76%"></div>
+              <div class="bar" data-value="88" style="height:88%"></div>
+            </div>
+          </div>
+
+          <div class="keypoints">
+            <div>5+<b>core tools</b></div>
+            <div>44+<b>template styles</b></div>
+            <div>0<b>server dependency</b></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="features" class="section">
+      <div class="container">
+        <div class="section-header">
+          <h2>Built to solve real tasks.</h2>
+          <p>Every tool is designed for speed, clarity, and practical use in classroom and medical reporting environments.</p>
+        </div>
+
+        <div class="feature-grid">
+          <article class="feature-card">
+            <div class="iconbox">📊</div>
+            <h3>Academic intelligence</h3>
+            <p>Generate professional report cards, session summaries, rankings, and academic performance dashboards in a few steps.</p>
+            <ul>
+              <li>Auto grade calculation</li>
+              <li>Performance sorting</li>
+              <li>Custom school remarks</li>
+            </ul>
+          </article>
+
+          <article class="feature-card">
+            <div class="iconbox">🎓</div>
+            <h3>Institution workflows</h3>
+            <p>Design ID cards, certificates, and formal documents with institution branding, color themes, and export-ready layouts.</p>
+            <ul>
+              <li>School identity system</li>
+              <li>Easy bulk generation</li>
+              <li>Professional print layout</li>
+            </ul>
+          </article>
+
+          <article class="feature-card">
+            <div class="iconbox">🩺</div>
+            <h3>Clinical support</h3>
+            <p>Analyze CBC values with rule-based logic to generate understandable health summaries and alerts using local intelligence.</p>
+            <ul>
+              <li>Low / normal / high checks</li>
+              <li>Pattern recognition</li>
+              <li>Clinical explanation layer</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="tools" class="section">
+      <div class="container">
+        <div class="section-header">
+          <h2>Core product suite</h2>
+          <p>These tools work together as one smart ecosystem for education and health reporting.</p>
+        </div>
+
+        <div class="tools-grid">
+          <article class="tool-card">
+            <span class="tool-badge">school</span>
+            <h4>Report Card Generator</h4>
+            <p>Generate official marks sheets with percentages, grades, remarks, and school print-ready layouts.</p>
+          </article>
+
+          <article class="tool-card">
+            <span class="tool-badge">identity</span>
+            <h4>ID Card Creator</h4>
+            <p>Create student or staff IDs with photo, class, batch, and institutional branding.</p>
+          </article>
+
+          <article class="tool-card">
+            <span class="tool-badge">certificate</span>
+            <h4>Certificate Maker</h4>
+            <p>Design appreciation, completion, and achievement certificates with premium styling and layout controls.</p>
+          </article>
+
+          <article class="tool-card">
+            <span class="tool-badge">cbc</span>
+            <h4>CBC Analyzer</h4>
+            <p>Review blood test values and generate clear explanations for patterns and risk signals.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="section-header">
+          <h2>Why VixorAI works.</h2>
+          <p>It combines institutional reporting with practical intelligence in a single local-first platform.</p>
+        </div>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-number">1</div>
+            <h3>Collect data</h3>
+            <p>Upload marks, student information, or medical values into a clean and simple interface.</p>
+          </div>
+
+          <div class="step">
+            <div class="step-number">2</div>
+            <h3>Analyze with logic</h3>
+            <p>VixorAI converts raw data into patterns, grades, rankings, and health-based observations.</p>
+          </div>
+
+          <div class="step">
+            <div class="step-number">3</div>
+            <h3>Export with confidence</h3>
+            <p>Prepare polished reports, cards, or summaries for print, sharing, or immediate presentation.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="demo" class="section showcase">
+      <div class="container">
+        <div class="section-header">
+          <h2>Interactive product preview</h2>
+          <p>This is a small preview. Open the working app for the full report-card, ID-card, certificate, session-report, and CBC tools.</p>
+        </div>
+
+        <div class="showcase-wrap">
+          <div class="panel">
+            <div class="tab-bar">
+              <button class="tab-btn active" data-tab="report">Report Card</button>
+              <button class="tab-btn" data-tab="cbc">CBC Analyzer</button>
+              <button class="tab-btn" data-tab="id">ID Card</button>
+            </div>
+
+            <div class="tab-panel active" id="report-tab">
+              <div class="form-grid">
+                <div class="two-col">
+                  <div class="field">
+                    <label>Student name</label>
+                    <input id="studentName" value="Maria" />
+                  </div>
+                  <div class="field">
+                    <label>Class</label>
+                    <input id="studentClass" value="10-A" />
+                  </div>
+                </div>
+
+                <div class="two-col">
+                  <div class="field"><label>Math</label><input id="math" type="number" value="92" /></div>
+                  <div class="field"><label>Science</label><input id="science" type="number" value="88" /></div>
+                </div>
+
+                <div class="two-col">
+                  <div class="field"><label>English</label><input id="english" type="number" value="90" /></div>
+                  <div class="field"><label>Computer</label><input id="computer" type="number" value="95" /></div>
+                </div>
+
+                <div class="two-col">
+                  <div class="field"><label>Islamiyat</label><input id="islamiyat" type="number" value="84" /></div>
+                  <div class="field"><label>Art</label><input id="art" type="number" value="91" /></div>
+                </div>
+
+                <button class="button primary" onclick="generateReportCard()">Generate report</button>
+              </div>
+            </div>
+
+            <div class="tab-panel" id="cbc-tab">
+              <div class="form-grid">
+                <div class="field"><label>Patient name</label><input id="cbcName" value="Umar" /></div>
+                <div class="two-col">
+                  <div class="field"><label>Hemoglobin</label><input id="hb" type="number" value="11.2" /></div>
+                  <div class="field"><label>WBC</label><input id="wbc" type="number" value="9.8" /></div>
+                </div>
+
+                <div class="two-col">
+                  <div class="field"><label>Platelets</label><input id="platelets" type="number" value="250" /></div>
+                  <div class="field"><label>MCV</label><input id="mcv" type="number" value="78" /></div>
+                </div>
+
+                <div class="two-col">
+                  <div class="field"><label>RBC</label><input id="rbc" type="number" value="4.2" /></div>
+                  <div class="field"><label>Neutrophils</label><input id="neutrophils" type="number" value="65" /></div>
+                </div>
+
+                <button class="button primary" onclick="generateCBCReport()">Analyze CBC</button>
+              </div>
+            </div>
+
+            <div class="tab-panel" id="id-tab">
+              <div class="form-grid">
+                <div class="field"><label>Student / Staff name</label><input id="idName" value="Umar" /></div>
+                <div class="two-col">
+                  <div class="field"><label>Roll no</label><input id="rollNo" value="27" /></div>
+                  <div class="field"><label>Class</label><input id="idClass" value="9-B" /></div>
+                </div>
+                <div class="field"><label>School</label><input id="schoolName" value="City Excellence Academy" /></div>
+                <button class="button primary" onclick="generateIDCard()">Generate ID card</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="preview">
+            <div id="reportPreview" class="report-preview">
+              <div class="report-header">
+                <div>
+                  <strong style="font-size:1.1rem;">Maria</strong><br>
+                  <small style="color:var(--muted);">Class 10-A</small>
+                </div>
+                <span class="report-badge">Excellent</span>
+              </div>
+
+              <div class="summary-grid">
+                <div class="summary-box"><span>Total</span><b>440</b></div>
+                <div class="summary-box"><span>Percentage</span><b>88%</b></div>
+                <div class="summary-box"><span>Grade</span><b>A</b></div>
+              </div>
+
+              <div class="subject-list">
+                <div class="subject-row"><strong>Math</strong><span>92</span><span>A+</span></div>
+                <div class="subject-row"><strong>Science</strong><span>88</span><span>A</span></div>
+                <div class="subject-row"><strong>English</strong><span>90</span><span>A+</span></div>
+                <div class="subject-row"><strong>Computer</strong><span>95</span><span>A+</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="why" class="section">
+      <div class="container">
+        <div class="story">
+          <div class="story-card">
+            <h3>Why this name: VixorAI</h3>
+            <p>Professionals need wiser workflows when it comes to turning data into clear, actionable insights; thus, we call our product VixorAI.</p>
+          </div>
+
+          <div class="name-box">
+            <span class="small">Brand meaning</span>
+            <h4>Vision<br>Intelligence<br>Action</h4>
+            <p>VixorAI is designed to turn information into confident decisions.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta">
+      <div class="container">
+        <div class="cta-box">
+          <div>
+            <h3>Built for serious workflows.</h3>
+            <p>VixorAI brings structure to school performance, institutions, and medical reporting in one powerful browser-based suite.</p>
+          </div>
+          <a class="button primary" href="./ViXorAI%20(1).html">Start using the working app</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container foot">
+      <div>© 2026 VixorAI. Built for offline intelligence and practical decision-making.</div>
+      <div>School tools • CBC analysis • Smart workflows</div>
+    </div>
+  </footer>
+
+  <script>
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const tabPanels = document.querySelectorAll('.tab-panel');
+
+    tabButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        tabButtons.forEach(btn => btn.classList.remove('active'));
+        tabPanels.forEach(panel => panel.classList.remove('active'));
+        button.classList.add('active');
+        document.getElementById(button.dataset.tab + '-tab').classList.add('active');
+      });
+    });
+
+    function getGrade(percentage) {
+      if (percentage >= 90) return 'A+';
+      if (percentage >= 80) return 'A';
+      if (percentage >= 70) return 'B';
+      if (percentage >= 60) return 'C';
+      if (percentage >= 50) return 'D';
+      return 'F';
+    }
+
+    function getRemark(percentage) {
+      if (percentage >= 90) return 'Outstanding performance and excellent consistency.';
+      if (percentage >= 80) return 'Very strong performance with significant potential.';
+      if (percentage >= 70) return 'Good progress with room for stronger consistency.';
+      if (percentage >= 60) return 'Satisfactory and improving steadily.';
+      if (percentage >= 50) return 'Needs additional focus and revision.';
+      return 'Requires immediate attention and academic support.';
+    }
+
+    function generateReportCard() {
+      const subjects = [
+        ['Math', Number(document.getElementById('math').value || 0)],
+        ['Science', Number(document.getElementById('science').value || 0)],
+        ['English', Number(document.getElementById('english').value || 0)],
+        ['Computer', Number(document.getElementById('computer').value || 0)],
+        ['Islamiyat', Number(document.getElementById('islamiyat').value || 0)],
+        ['Art', Number(document.getElementById('art').value || 0)]
+      ];
+
+      const total = subjects.reduce((sum, [, score]) => sum + score, 0);
+      const percentage = Math.round(total / subjects.length);
+      const grade = getGrade(percentage);
+      const remark = getRemark(percentage);
+      const studentName = document.getElementById('studentName').value || 'Student';
+      const className = document.getElementById('studentClass').value || 'Class';
+
+      const html = `
+        <div class="report-header">
+          <div>
+            <strong style="font-size:1.1rem;">${studentName}</strong><br>
+            <small style="color:var(--muted);">${className}</small>
+          </div>
+          <span class="report-badge">${grade === 'A+' || grade === 'A' ? 'Excellent' : 'Good'}</span>
+        </div>
+
+        <div class="summary-grid">
+          <div class="summary-box"><span>Total</span><b>${total}</b></div>
+          <div class="summary-box"><span>Percentage</span><b>${percentage}%</b></div>
+          <div class="summary-box"><span>Grade</span><b>${grade}</b></div>
+        </div>
+
+        <div class="subject-list">
+          ${subjects.map(([name, score]) => `
+            <div class="subject-row">
+              <strong>${name}</strong>
+              <span>${score}</span>
+              <span>${getGrade(score)}</span>
+            </div>
+          `).join('')}
+        </div>
+
+        <div style="margin-top:18px; padding:12px 14px; border-radius:12px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.08); color:var(--muted); line-height:1.6;">${remark}</div>
+      `;
+
+      document.querySelector('.preview').innerHTML = html;
+    }
+
+    function getCBCStatus(value, low, high) {
+      if (value < low) return 'low';
+      if (value > high) return 'high';
+      return 'normal';
+    }
+
+    function formatCBCStatus(status) {
+      if (status === 'normal') return '<span class="status good">Normal</span>';
+      if (status === 'low') return '<span class="status warn">Low</span>';
+      return '<span class="status alert">High</span>';
+    }
+
+    function generateCBCReport() {
+      const patientName = document.getElementById('cbcName').value.trim() || 'Umar';
+      const hb = Number(document.getElementById('hb').value || 0);
+      const wbc = Number(document.getElementById('wbc').value || 0);
+      const platelets = Number(document.getElementById('platelets').value || 0);
+      const mcv = Number(document.getElementById('mcv').value || 0);
+      const rbc = Number(document.getElementById('rbc').value || 0);
+      const neutrophils = Number(document.getElementById('neutrophils').value || 0);
+
+      const hbStatus = getCBCStatus(hb, 11.5, 16.5);
+      const wbcStatus = getCBCStatus(wbc, 4.0, 11.0);
+      const plateletStatus = getCBCStatus(platelets, 150, 450);
+      const mcvStatus = getCBCStatus(mcv, 80, 100);
+      const rbcStatus = getCBCStatus(rbc, 3.8, 5.1);
+      const neutrophilStatus = getCBCStatus(neutrophils, 40, 75);
+
+      let summary = 'CBC values are broadly within reference range. No major abnormality is indicated from the entered set.';
+      if (hbStatus === 'low' || mcvStatus === 'low') summary = 'Possible anemia pattern is suggested by lower hemoglobin and/or lower MCV values. Consider follow-up with a clinician.';
+      if (wbcStatus === 'high' || neutrophilStatus === 'high') summary = 'A mild inflammatory or infection-related pattern may be present. Review symptoms and consider a clinical assessment.';
+      if (plateletStatus === 'low') summary = 'Platelet levels are low and may need medical review, especially if bruising or bleeding symptoms occur.';
+      if (plateletStatus === 'high') summary = 'Platelet count is elevated and clinical context should be reviewed.';
+
+      const html = `
+        <div class="cbc-card">
+          <div class="report-header">
+            <div>
+              <strong style="font-size:1.1rem;">CBC for ${patientName}</strong><br>
+              <small style="color:var(--muted);">Local AI interpretation</small>
+            </div>
+            ${hbStatus === 'normal' && wbcStatus === 'normal' && plateletStatus === 'normal' ? '<span class="status good">Stable</span>' : '<span class="status warn">Review</span>'}
+          </div>
+
+          <div class="cbc-metric"><div><small>Hemoglobin</small><br><strong>${hb} g/dL</strong></div>${formatCBCStatus(hbStatus)}</div>
+          <div class="cbc-metric"><div><small>WBC</small><br><strong>${wbc} x10^9/L</strong></div>${formatCBCStatus(wbcStatus)}</div>
+          <div class="cbc-metric"><div><small>Platelets</small><br><strong>${platelets} x10^9/L</strong></div>${formatCBCStatus(plateletStatus)}</div>
+          <div class="cbc-metric"><div><small>MCV</small><br><strong>${mcv} fL</strong></div>${formatCBCStatus(mcvStatus)}</div>
+          <div class="cbc-metric"><div><small>RBC</small><br><strong>${rbc} x10^12/L</strong></div>${formatCBCStatus(rbcStatus)}</div>
+          <div class="cbc-metric"><div><small>Neutrophils</small><br><strong>${neutrophils}%</strong></div>${formatCBCStatus(neutrophilStatus)}</div>
+
+          <div style="margin-top:18px; padding:14px 16px; border-radius:12px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.08); color:var(--muted); line-height:1.65;">${summary}</div>
+        </div>
+      `;
+
+      document.querySelector('.preview').innerHTML = html;
+    }
+
+    function generateIDCard() {
+      const name = document.getElementById('idName').value || 'Student Name';
+      const roll = document.getElementById('rollNo').value || '00';
+      const className = document.getElementById('idClass').value || 'Class';
+      const school = document.getElementById('schoolName').value || 'School Name';
+
+      const html = `
+        <div style="display:grid; place-items:center; min-height:330px;">
+          <div style="width:100%; max-width:520px; background:linear-gradient(135deg,#101a2d,#171f2f); border:1px solid rgba(255,255,255,0.08); border-radius:22px; box-shadow:0 20px 40px rgba(0,0,0,0.3); overflow:hidden;">
+            <div style="padding:18px 20px; background:linear-gradient(90deg,#7c5cff,#29d0b1); color:#07111f; font-weight:800; letter-spacing:0.08em; text-transform:uppercase;">${school}</div>
+            <div style="display:grid; grid-template-columns: 110px 1fr; gap:18px; padding:20px; align-items:center;">
+              <div style="width:100px; height:120px; border-radius:14px; background:linear-gradient(135deg,#7c5cff,#29d0b1); display:grid; place-items:center; font-size:2.2rem; color:#07111f; font-weight:900;">${name.charAt(0).toUpperCase()}</div>
+              <div>
+                <div style="font-size:1.5rem; font-weight:800; letter-spacing:-0.05em; margin-bottom:6px;">${name}</div>
+                <div style="color:var(--muted); margin-bottom:4px;">Roll No: <strong style="color:var(--ink);">${roll}</strong></div>
+                <div style="color:var(--muted); margin-bottom:4px;">Class: <strong style="color:var(--ink);">${className}</strong></div>
+                <div style="color:var(--muted);">Institution ID Card</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.querySelector('.preview').innerHTML = html;
+    }
+
+    generateReportCard();
+  </script>
+</body>
+</html>
