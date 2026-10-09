@@ -117,6 +117,7 @@ h1 b{background:linear-gradient(105deg,var(--a1),var(--a2));-webkit-background-c
 .filter-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .filter-chip{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;padding:8px 13px;background:var(--card);color:var(--mute);font:600 .82rem Inter,system-ui,sans-serif;cursor:pointer;transition:background .16s,border-color .16s,color .16s}
 .filter-chip:hover{border-color:var(--a1);color:var(--ink)}
+.tile[hidden]{display:none!important}
 .filter-chip[aria-pressed="true"]{background:color-mix(in srgb,var(--a1) 10%,var(--card));border-color:color-mix(in srgb,var(--a1) 36%,var(--line));color:var(--a1)}
 .filter-chip span{font-size:.7rem;opacity:.75}
 .grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:18px;margin-top:20px}
