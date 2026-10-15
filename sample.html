@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>COSMIC WORLD - Earth Mission Control & Day/Night Cycle</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            user-select: none;
+        }
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #000;
+            color: #fff;
+        }
+        #webgl-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        /* Mobile UI Overlays */
+        #ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 10px;
+        }
+        .interactive {
+            pointer-events: auto;
+        }
+        /* Top Notification Tray */
+        #top-tray {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            width: 100%;
+        }
+        .news-notification {
+            background: rgba(10, 25, 50, 0.85);
+            border: 1px solid #00ffcc;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 4px 15px rgba(0,255,204,0.3);
+            animation: slideDown 0.4s ease;
+        }
+        .news-notification button {
+            background: #00ffcc;
+            color: #000;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        @keyframes slideDown {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        /* HUD Day/Night Info */
+        #hud-panel {
+            position: absolute;
+            top: 60px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            border-left: 3px solid #ffaa00;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 11px;
+            backdrop-filter: blur(4px);
+        }
+        /* Bottom Compact Crew & Controls */
+        #bottom-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+            align-items: center;
+            padding-bottom: 5px;
+        }
+        #crew-bar {
+            display: flex;
+            gap: 6px;
+            background: rgba(5, 15, 30, 0.8);
+            padding: 6px 10px;
+            border-radius: 20px;
+            border: 1px solid rgba(0, 255, 204, 0.4);
+            max-width: 100%;
+            overflow-x: auto;
+        }
+        .crew-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: #112244;
+            border: 2px solid #555;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s;
+        }
+        .crew-icon.selected {
+            border-color: #00ffcc;
+            box-shadow: 0 0 8px #00ffcc;
+            transform: scale(1.05);
+        }
+        .crew-icon.active-cmd {
+            border-color: #ffaa00;
+        }
+        /* Action Buttons Bar */
+        #action-bar {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            justify-content: center;
+        }
+        .nav-btn {
+            background: linear-gradient(135deg, #0077ff, #00aaff);
+            color: #fff;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 25px;
+            font-size: 13px;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,119,255,0.4);
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        .nav-btn:active {
+            transform: scale(0.95);
+        }
+        .nav-btn.alt {
+            background: linear-gradient(135deg, #ff4400, #ffaa00);
+            box-shadow: 0 4px 10px rgba(255,68,0,0.4);
+        }
+        /* Modal & Pause Overlay */
+        #modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 100;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            backdrop-filter: blur(8px);
+        }
+        .modal-content {
+            background: #0a1128;
+            border: 2px solid #00ffcc;
+            width: 100%;
+            max-width: 500px;
+            max-height: 85vh;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            box-shadow: 0 0 30px rgba(0,255,204,0.3);
+            overflow-y: auto;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 10px;
+        }
+        .modal-header h2 {
+            font-size: 18px;
+            color: #00ffcc;
+        }
+        .close-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 22px;
+            cursor: pointer;
+        }
+        /* Mission Control Room & Archive UI styling inside modal */
+        .mc-screen {
+            background: #000;
+            border: 2px solid #333;
+            border-radius: 8px;
+            padding: 12px;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .gallery-strip {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 5px 0;
+            width: 100%;
+        }
+        .gallery-thumb {
+            width: 60px;
+            height: 60px;
+            border-radius: 6px;
+            border: 1px solid #555;
+            object-fit: cover;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .gallery-thumb.selected {
+            border-color: #00ffcc;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="webgl-container"></div>
+
+    <div id="ui-layer">
+        <!-- Top Notification Tray -->
+        <div id="top-tray">
+            <div id="breaking-news" class="news-notification interactive">
+                <span id="news-text">📡 Mission Control: Planetary approach stable.</span>
+                <button onclick="openDetailModal()">Detail</button>
+            </div>
+        </div>
+
+        <!-- HUD Day/Night Info -->
+        <div id="hud-panel" class="interactive">
+            <div id="hud-world">Destination: Mars</div>
+            <div id="hud-time">Local Time: 12:45 Sol</div>
+            <div id="hud-phase">Phase: Daytime</div>
+            <div id="hud-met">MET: 04:12:30</div>
+        </div>
+
+        <!-- Bottom Panel: Compact Crew + Nav Buttons -->
+        <div id="bottom-panel">
+            <!-- Compact Crew Bar -->
+            <div id="crew-bar" class="interactive">
+                <div class="crew-icon active-cmd" onclick="selectCrew(0)" title="Commander Atlas">CMD</div>
+                <div class="crew-icon" onclick="selectCrew(1)" title="Dr. Nova">SCI</div>
+                <div class="crew-icon" onclick="selectCrew(2)" title="Engineer Orion">ENG</div>
+                <div class="crew-icon" onclick="selectCrew(3)" title="Pilot Lyra">PLT</div>
+            </div>
+
+            <!-- Action Buttons Bar -->
+            <div id="action-bar" class="interactive">
+                <button class="nav-btn" onclick="toggleViewMode('controller')">View Controller</button>
+                <button class="nav-btn alt" onclick="toggleViewMode('space')">View Space</button>
+                <button class="nav-btn" onclick="openPhotoCapture()" style="background:linear-gradient(135deg, #00aa44, #00ff88);">Take Photo</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Pause & Detail Overlay -->
+    <div id="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Earth Mission Control & Discovery Archive</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div id="modal-body">
+                <!-- Dynamic content injected via script -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Three.js Engine & Game Script -->
+    <script src="lib/three.min.js"></script>
+    <script>
+        // --- GAME STATE & CONFIGURATION ---
+        let scene, camera, renderer, clock;
+        let celestialBody, atmosphereMesh, spacecraft, terrainGroup, roverRobots = [];
+        let dayTime = 0.5; // 0 to 1
+        let simSpeed = 0.05;
+        let currentDestination = "Mars";
+        let viewMode = "space"; // 'space' or 'controller'
+        let selectedCrewIndex = 0;
+        let crewList = [
+            { name: "Atlas", role: "Commander", status: "Active", x: 0, z: 0 },
+            { name: "Nova", role: "Scientist", status: "Active", x: 2, z: 2 },
+            { name: "Orion", role: "Engineer", status: "Active", x: -2, z: 2 },
+            { name: "Lyra", role: "Pilot", status: "Active", x: 0, z: 4 }
+        ];
+        let discoveryArchive = [];
+        let activeNotification = "📡 Earth Mission Control: Telemetry feed stable.";
+
+        // --- INITIALIZATION ---
+        function init() {
+            const container = document.getElementById('webgl-container');
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x020208);
+
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 10, 20);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+            container.appendChild(renderer.domElement);
+
+            clock = new THREE.Clock();
+
+            setupLighting();
+            createEnvironment();
+            setupEventListeners();
+
+            animate();
+        }
+
+        // --- LIGHTING & DAY/NIGHT SYSTEM ---
+        let sunLight, ambientLight, starField;
+
+        function setupLighting() {
+            ambientLight = new THREE.AmbientLight(0x334466, 0.4);
+            scene.add(ambientLight);
+
+            sunLight = new THREE.DirectionalLight(0xffeedd, 1.5);
+            sunLight.position.set(50, 30, 50);
+            sunLight.castShadow = true;
+            scene.add(sunLight);
+
+            // Starfield background
+            const starsGeometry = new THREE.BufferGeometry();
+            const starsCount = 1500;
+            const starPositions = new Float32Array(starsCount * 3);
+            for(let i = 0; i < starsCount * 3; i++) {
+                starPositions[i] = (Math.random() - 0.5) * 500;
+            }
+            starsGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+            const starsMaterial = new THREE.PointsMaterial({color: 0xffffff, size: 1.2});
+            starField = new THREE.Points(starsGeometry, starsMaterial);
+            scene.add(starField);
+        }
+
+        // --- PLANETARY & 3D ENVIRONMENT ---
+        function createEnvironment() {
+            // Main Celestial Body / Planet Ground
+            const planetGeo = new THREE.SphereGeometry(50, 32, 32);
+            const planetMat = new THREE.MeshStandardMaterial({
+                color: 0xcc5533,
+                roughness: 0.9,
+                metalness: 0.1
+            });
+            celestialBody = new THREE.Mesh(planetGeo, planetMat);
+            celestialBody.position.set(0, -52, 0);
+            celestialBody.receiveShadow = true;
+            scene.add(celestialBody);
+
+            // Astronaut Robots / Crew Models
+            terrainGroup = new THREE.Group();
+            scene.add(terrainGroup);
+
+            crewList.forEach((crew, idx) => {
+                const robotGroup = new THREE.Group();
+                
+                // Body
+                const bodyGeo = new THREE.CylinderGeometry(0.4, 0.6, 1.2, 8);
+                const bodyMat = new THREE.MeshStandardMaterial({color: idx === 0 ? 0xffaa00 : 0xcccccc});
+                const body = new THREE.Mesh(bodyGeo, bodyMat);
+                body.position.y = 0.6;
+                body.castShadow = true;
+                robotGroup.add(body);
+
+                // Helmet
+                const helmGeo = new THREE.SphereGeometry(0.4, 16, 16);
+                const helmMat = new THREE.MeshStandardMaterial({color: 0x222222, roughness: 0.1, metalness: 0.8});
+                const helm = new THREE.Mesh(helmGeo, helmMat);
+                helm.position.y = 1.4;
+                robotGroup.add(helm);
+
+                robotGroup.position.set(crew.x, 0, crew.z);
+                terrainGroup.add(robotGroup);
+                roverRobots.push(robotGroup);
+            });
+
+            // Discoverable Anomaly / Unusual Rock Formation
+            const rockGeo = new THREE.DodecahedronGeometry(0.8, 1);
+            const rockMat = new THREE.MeshStandardMaterial({color: 0x00ffcc, emissive: 0x004433, roughness: 0.3});
+            const anomaly = new THREE.Mesh(rockGeo, rockMat);
+            anomaly.position.set(4, 0.4, -3);
+            anomaly.name = "Unusual Crystalline Formation";
+            terrainGroup.add(anomaly);
+        }
+
+        // --- ANIMATION & DYNAMIC CYCLE LOOP ---
+        function animate() {
+            requestAnimationFrame(animate);
+            const delta = clock.getDelta();
+
+            // Advance Day/Night Cycle
+            dayTime += simSpeed * delta * 0.05;
+            if (dayTime > 1) dayTime = 0;
+
+            // Calculate Sun Position based on rotation
+            const sunAngle = dayTime * Math.PI * 2;
+            sunLight.position.x = Math.cos(sunAngle) * 100;
+            sunLight.position.y = Math.sin(sunAngle) * 100;
+            sunLight.position.z = Math.sin(sunAngle * 0.5) * 50;
+
+            // Dynamic Lighting & Atmosphere Transition colors
+            if (sunLight.position.y > 0) {
+                // Daytime / Sunrise / Sunset
+                const intensity = Math.min(Math.max(sunLight.position.y / 50, 0.1), 1.5);
+                sunLight.intensity = intensity;
+                ambientLight.intensity = 0.2 + intensity * 0.3;
+                
+                if (sunLight.position.y < 15) {
+                    // Sunset / Sunrise golden/red hues
+                    sunLight.color.setHex(0xff7733);
+                    scene.background.setHex(0x331105);
+                } else {
+                    sunLight.color.setHex(0xffeedd);
+                    scene.background.setHex(0x050b14);
+                }
+            } else {
+                // Nighttime
+                sunLight.intensity = 0.05;
+                ambientLight.intensity = 0.1;
+                sunLight.color.setHex(0x4466aa);
+                scene.background.setHex(0x010103);
+            }
+
+            // Update HUD text
+            updateHUDDisplay();
+
+            renderer.render(scene, camera);
+        }
+
+        function updateHUDDisplay() {
+            const hours = Math.floor(dayTime * 24);
+            const mins = Math.floor((dayTime * 24 - hours) * 60);
+            document.getElementById('hud-time').innerText = `Local Time: ${hours.toString().padStart(2,'0')}:${mins.toString().padStart(2,'0')} Sol`;
+            
+            let phase = "Daytime";
+            if (sunLight.position.y < 0) phase = "Nighttime";
+            else if (sunLight.position.y < 15 && dayTime < 0.5) phase = "Sunrise";
+            else if (sunLight.position.y < 15 && dayTime >= 0.5) phase = "Sunset";
+            document.getElementById('hud-phase').innerText = `Phase: ${phase}`;
+        }
+
+        // --- USER INTERACTION & CONTROLS ---
+        function selectCrew(index) {
+            selectedCrewIndex = index;
+            document.querySelectorAll('.crew-icon').forEach((el, idx) => {
+                if (idx === index) el.classList.add('selected');
+                else el.classList.remove('selected');
+            });
+            updateNotification(`Crew Member ${crewList[index].name} (${crewList[index].role}) selected.`);
+        }
+
+        function toggleViewMode(mode) {
+            viewMode = mode;
+            if (mode === 'controller') {
+                openMissionControlModal();
+            } else if (mode === 'space') {
+                camera.position.set(0, 8, 15);
+                camera.lookAt(0, 0, 0);
+                updateNotification("Switched to Deep Space & Surface View.");
+            }
+        }
+
+        function updateNotification(msg) {
+            activeNotification = msg;
+            document.getElementById('news-text').innerText = msg;
+        }
+
+        // --- DISCOVERY & PHOTO TRANSMISSION PIPELINE ---
+        function openPhotoCapture() {
+            // Simulate capturing photo of current scene / anomaly
+            const modal = document.getElementById('modal-overlay');
+            const title = document.getElementById('modal-title');
+            const body = document.getElementById('modal-body');
+
+            title.innerText = "Astronaut Field Camera - Discovery Capture";
+            body.innerHTML = `
+                <div class="mc-screen" style="border: 2px solid #00ffcc; background: #112;">
+                    <div style="position: absolute; top: 10px; left: 10px; font-size: 10px; color: #00ffcc;">TARGET: Unusual Crystalline Formation</div>
+                    <div style="width: 220px; height: 120px; background: linear-gradient(135deg, #cc5533, #331122); border-radius: 4px; display: flex; align-items: center; justifyContent: center; border: 1px dashed #00ffcc; margin: 10px 0;">
+                        <span style="font-size: 12px; font-weight: bold; color: #fff;">[ LIVE OPTICAL SNAPSHOT ]</span>
+                    </div>
+                    <div style="font-size: 11px; color: #aaa;">Location: Sector 7G, ${currentDestination} \vert{} Photographed by:${crewList[selectedCrewIndex].name}</div>
+                </div>
+                <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 10px;">
+                    <button class="nav-btn alt" onclick="closeModal()">Retake / Discard</button>
+                    <button class="nav-btn" onclick="sendPhotoToEarth()" style="background: #00ffcc; color: #000;">Send to Earth</button>
+                </div>
+            `;
+            modal.style.display = 'flex';
+        }
+
+        function sendPhotoToEarth() {
+            const newDiscovery = {
+                id: Date.now(),
+                title: "Unusual Crystalline Formation",
+                destination: currentDestination,
+                photographer: crewList[selectedCrewIndex].name,
+                time: "Sol 4 - 13:20",
+                imgGradient: "linear-gradient(135deg, #004466, #00ffcc)"
+            };
+            discoveryArchive.unshift(newDiscovery);
+
+            updateNotification(`📸 Transmission Complete: ${newDiscovery.title} received at Earth Mission Control!`);
+            closeModal();
+            openMissionControlModal();
+        }
+
+        // --- EARTH MISSION CONTROL ROOM & ARCHIVE MODAL ---
+        function openMissionControlModal() {
+            const modal = document.getElementById('modal-overlay');
+            const title = document.getElementById('modal-title');
+            const body = document.getElementById('modal-body');
+
+            title.innerText = "Earth Mission Control Centre - Live Operations";
+            
+            let latestPhotoHtml = `<div style="color: #666; font-size: 12px;">No incoming discoveries archived yet. Explore and transmit photos!</div>`;
+            let galleryHtml = ``;
+
+            if (discoveryArchive.length > 0) {
+                const latest = discoveryArchive[0];
+                latestPhotoHtml = `
+                    <div style="width: 100%; height: 140px; background: ${latest.imgGradient}; border-radius: 6px; display: flex; flex-direction: column; justify-content: flex-end; padding: 10px; border: 1px solid #00ffcc;">
+                        <div style="font-weight: bold; font-size: 13px; color: #fff;">${latest.title}</div>
+                        <div style="font-size: 10px; color: #00ffcc;">Dest: ${latest.destination} | By: ${latest.photographer} | ${latest.time}</div>
+                    </div>
+                `;
+                
+                galleryHtml = `<div class="gallery-strip">`;
+                discoveryArchive.forEach((item, idx) => {
+                    galleryHtml += `<div onclick="selectArchiveItem(${idx})" style="width:55px; height:55px; background:${item.imgGradient}; border-radius:4px; border:1px solid ${idx===0?'#00ffcc':'#444'}; display:flex; align-items:center; justify-content:center; font-size:9px; text-align:center; cursor:pointer;">Photo ${idx+1}</div>`;
+                });
+                galleryHtml += `</div>`;
+            }
+
+            body.innerHTML = `
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <div style="font-size: 12px; color: #00ffcc; font-weight: bold;">[ CENTRAL WALL SCREEN - LIVE TELEMETRY ]</div>
+                    <div class="mc-screen">
+                        ${latestPhotoHtml}
+                    </div>
+                    <div style="font-size: 11px; color: #aaa; margin-top: 5px;">Discovery Archive Feed (${discoveryArchive.length} items received):</div>
+                    ${galleryHtml}
+                    <div style="background: rgba(255,255,255,0.05); padding: 8px; border-radius: 6px; font-size: 11px; display: flex; justify-content: space-between;">
+                        <span>Active Crew: 4 Online</span>
+                        <span>Comms Delay: 3.2s (Simulated)</span>
+                        <span style="color: #00ffcc;">Status: GREEN</span>
+                    </div>
+                </div>
+            `;
+            modal.style.display = 'flex';
+        }
+
+        function openDetailModal() {
+            openMissionControlModal();
+        }
+
+        function closeModal() {
+            document.getElementById('modal-overlay').style.display = 'none';
+        }
+
+        function setupEventListeners() {
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
